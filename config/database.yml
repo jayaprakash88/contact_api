@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: utf-8
+  host:  <%= ENV['DATABASE_HOST'] %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  port: 5432
+
+
+development:
+  <<: *default
+  database: contact_api
+
+test:
+  <<: *default
+  database: contact_api_test
+
+production:
+  <<: *default
+  database: contact_api_production
+
