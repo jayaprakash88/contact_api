@@ -15,14 +15,15 @@ module Contact::V2
         end
       end
     end
-    
+
     resource :contact_data do
       desc "List all Contact"
-      
+
       get do
-          ContactDatum.all.order(:created_at)
+        contacts = ContactDatum.all.order(:created_at)
+        present contacts, with: Entities::Contact
       end
-    
+
       # curl http://localhost:3000/api/v1/contact_create.json -d "name=jayaprakash;address=jjj;"
       # curl -H 'Content-Type:application/json' -H 'Accept:application/json' -X POST http://localhost:3000/api/v1/contact_create -d '{"name":"first name", "address": "last name", "age":25}'
 
@@ -38,9 +39,9 @@ module Contact::V2
       ## This takes care of creating contact
       post do
         contact = ContactDatum.create!(declared(params))
-        #present contact, with: v2::Entities::Contact
+        present contact, with: Entities::Contact
       end
-    
+
       # curl -X DELETE http://localhost:3000/api/v1/delete_contact/1.json
       desc "delete an contact"
       params do
@@ -49,7 +50,7 @@ module Contact::V2
       delete 'delete/:id' do
         ContactDatum.find(params[:id]).destroy!
       end
- 
+
       # curl -X PUT http://localhost:3000/api/v1/update_contact/2.json -d "address=mumbai"
       # curl -H 'Content-Type:application/json' -H 'Accept:application/json' -X PUT http://localhost:3000/api/v1/update_contact/4 -d '{"name":"last name", "address": "Bangalore", "age":20}'
 
@@ -62,12 +63,7 @@ module Contact::V2
         requires :age,type: Integer
       end
       put 'update/:id' do
-        ContactDatum.find(params[:id]).update_attributes({
-            email:params[:email],
-            name:params[:name],
-            address:params[:address],
-            age:params[:age]
-          })
+        ContactDatum.find(params[:id]).update_attributes({email:params[:email],name:params[:name],address:params[:address],age:params[:age]})
       end
 
 
@@ -81,18 +77,21 @@ module Contact::V2
         at_least_one_of :id,:email
       end
       put 'update_by_email' do
-        ContactDatum.by_id_or_email!(params[:id], params[:email]).update_attributes!(declared(params, {include_missing: false}))
+        contact = ContactDatum.by_id_or_email!(params[:id], params[:email])
+        contact.update_attributes!(declared(params, {include_missing: false}))
+        present contact, with: Entities::Contact
       end
 
-      
+
       desc "show contact detail"
-    
+
       params do
         requires :id, type:String
       end
-    
+
       get "show/:id" do
-        ContactDatum.find(params[:id])
+        contact = ContactDatum.find(params[:id])
+        present contact, with: Entities::Contact
       end
 
       desc 'Get a contact based on email'
@@ -101,7 +100,8 @@ module Contact::V2
       end
 
       get 'by_email' do
-        ContactDatum.find_by!(email: params[:email])
+        contact = ContactDatum.find_by!(email: params[:email])
+        present contact, with: Entities::Contact
       end
 
       desc "delete email"
@@ -111,7 +111,8 @@ module Contact::V2
         at_least_one_of :id,:email
       end
       delete "delete_by_email" do
-        ContactDatum.by_id_or_email!(params[:id], params[:email]).destroy!
+        contact = ContactDatum.by_id_or_email!(params[:id], params[:email]).destroy!
+        present contact, with: Entities::Contact
       end
     end
 
