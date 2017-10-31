@@ -2,7 +2,7 @@ module Contact
   class Data < Grape::API
     format :json
 # curl http://localhost:3000/api/v1/contact_data.json
-    resource :contact_data do
+    resource :all_contact do
       desc "List all Contact"
 
       get do

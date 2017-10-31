@@ -1,3 +1,5 @@
+require 'grape-swagger'
+
 class API < Grape::API
   rescue_from ActiveRecord::RecordNotFound do |e|
     error!('Record not found', 404)
@@ -17,6 +19,15 @@ class API < Grape::API
   prefix 'api'
   version 'v2', using: :path
   mount Contact::V2::Detail
+
+  add_swagger_documentation mount_path: '/swagger_doc',
+                           schemes: ['http'],
+                           host: 'localhost:3000',
+                           doc_version: '0.0.1 Draft',
+                           info: {
+                               title: 'Contact API',
+                               description: 'API for contact details'
+                           }
 
   
 end

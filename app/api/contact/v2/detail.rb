@@ -17,8 +17,8 @@ module Contact::V2
     end
 
     resource :contact_data do
-      desc "List all Contact"
-
+      desc "List all Contact",
+      success: Entities::Contact
       get do
         contacts = ContactDatum.all.order(:created_at)
         present contacts, with: Entities::Contact
@@ -27,7 +27,8 @@ module Contact::V2
       # curl http://localhost:3000/api/v1/contact_create.json -d "name=jayaprakash;address=jjj;"
       # curl -H 'Content-Type:application/json' -H 'Accept:application/json' -X POST http://localhost:3000/api/v1/contact_create -d '{"name":"first name", "address": "last name", "age":25}'
 
-      desc "create a new contact"
+      desc "create a new contact",
+      success: Entities::Contact
       ## This takes care of parameter validation
       params do
         optional :id, desc: 'If not passed, it will be generated'
@@ -43,31 +44,37 @@ module Contact::V2
       end
 
       # curl -X DELETE http://localhost:3000/api/v1/delete_contact/1.json
-      desc "delete an contact"
+      desc "delete an contact",
+      success: Entities::JustId
       params do
         requires :id, type: String
       end
       delete 'delete/:id' do
-        ContactDatum.find(params[:id]).destroy!
+        contact=ContactDatum.find(params[:id]).destroy!
+        present contact, with: Entities::JustId
       end
 
       # curl -X PUT http://localhost:3000/api/v1/update_contact/2.json -d "address=mumbai"
       # curl -H 'Content-Type:application/json' -H 'Accept:application/json' -X PUT http://localhost:3000/api/v1/update_contact/4 -d '{"name":"last name", "address": "Bangalore", "age":20}'
 
-      desc "update an contact address"
+      desc "update an contact address",
+      success: Entities::Contact
       params do
         requires :id, type: String
-        requires :email, type: String
-        requires :name, type: String
-        requires :address, type: String
-        requires :age,type: Integer
+        optional :email, type: String
+        optional :name, type: String
+        optional :address, type: String
+        optional :age,type: Integer
       end
       put 'update/:id' do
-        ContactDatum.find(params[:id]).update_attributes({email:params[:email],name:params[:name],address:params[:address],age:params[:age]})
+        contact=ContactDatum.find(params[:id])
+        contact.update_attributes(params)
+        present contact, with: Entities::Contact
       end
 
 
-      desc "update an contact address by mail"
+      desc "update an contact address by mail",
+      success: Entities::Contact
       params do
         optional :id, desc: 'If not passed, it will be generated'
         optional :email, type: String
@@ -83,8 +90,8 @@ module Contact::V2
       end
 
 
-      desc "show contact detail"
-
+      desc "show contact detail",
+      success: Entities::Contact
       params do
         requires :id, type:String
       end
@@ -94,7 +101,8 @@ module Contact::V2
         present contact, with: Entities::Contact
       end
 
-      desc 'Get a contact based on email'
+      desc 'Get a contact based on email',
+      success: Entities::Contact
       params do
         requires :email, type: String , desc: 'email', documentation: {default: 'me@example.com'}
       end
@@ -104,7 +112,8 @@ module Contact::V2
         present contact, with: Entities::Contact
       end
 
-      desc "delete email"
+      desc "delete email",
+      success: Entities::JustId
       params do
         optional :id, desc: 'If not passed, it will be generated'
         optional :email, type: String
